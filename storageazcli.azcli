@@ -1,0 +1,62 @@
+# Login into Azure 
+az login
+
+# List all the azure accounts
+az account list -o table
+
+# Set one account as the default
+az account set  --subscription "AzurePass"
+
+# Get all the resource groups
+az group list
+az group list --query [].name
+
+# VAriable
+$rgName = 'rg-armtemplates'
+$location = 'South India'
+
+# Create a resource Group
+az group create `
+    --name $rgName `
+    --location $location
+
+az group list --query [].name
+
+# Create the blank template
+$templateFile = 'mnazuretemplate.json'
+$templateName = 'functiontemplate'
+$storageName = 'mnpstorage123456'
+
+# Create StorageAccount with parameters StorageName give SKU not given
+az group deployment create `
+    --name $templateName `
+    --resource-group $rgName `
+    --template-file $templateFile `
+    --parameters storageName=$storageName
+
+# Create StorageAccount with parameters StorageName give, SKU wrongly given
+az group deployment create `
+    --name $templateName `
+    --resource-group $rgName `
+    --template-file $templateFile `
+    --parameters storageName=$storageName storageSku='Standard_GRS'
+
+# Create StorageAccount without providing the location (Using Function Template)
+az group deployment create `
+    --name $templateName `
+    --resource-group $rgName `
+    --template-file $templateFile `
+    --parameters storageName=$storageName
+
+# Create a storage account using the variable template
+$templateName = 'variabletemplate'
+$storagePrefix = 'mnstorage'
+
+az group deployment create `
+    --name $templateName `
+    --resource-group $rgName `
+    --template-file $templateFile `
+    --parameters storagePrefix=$storagePrefix
+
+# delete a group
+az group delete --name $rgName --no-wait --yes
